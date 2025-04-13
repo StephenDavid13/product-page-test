@@ -111,17 +111,16 @@ export default {
         
         // Transform API response to match component data structure
         const productData = response.data.data
-        const hasDiscount = productData.discount?.active && productData.discount?.amount > 0
         
         this.product = {
           name: productData.name,
           description: productData.description,
-          price: hasDiscount ? productData.price.discounted : productData.price.full,
-          original_price: hasDiscount ? productData.price.full : null,
-          discount: hasDiscount ? productData.discount.amount : 0,
-          images: productData.images.map(img => ({
-            url: img.url,
-            alt: img.alt
+          price: productData.price.discounted,
+          original_price: productData.price.full,
+          discount: productData.discount.amount,
+          images: productData.images.map(path => ({
+            url: this.getImageUrl(path),
+            alt: productData.name
           }))
         }
       } catch (error) {
@@ -137,6 +136,12 @@ export default {
       } finally {
         this.loading = false
       }
+    },
+
+    getImageUrl(path) {
+      // Remove leading slash if present
+      const cleanPath = path.startsWith('/') ? path.substring(1) : path
+      return `/${cleanPath}`
     },
 
     formatPrice(price) {
@@ -176,249 +181,6 @@ export default {
 }
 </script>
 
-<style scoped>
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.product-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-}
-
-@media (min-width: 768px) {
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Image Gallery */
-.image-gallery {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.main-image {
-  border-radius: 1rem;
-  overflow: hidden;
-  background-color: #fff7ed;
-  aspect-ratio: 1;
-}
-
-.main-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.thumbnail-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-}
-
-.thumbnail {
-  border: 2px solid transparent;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  padding: 0;
-  cursor: pointer;
-  aspect-ratio: 1;
-  background: none;
-}
-
-.thumbnail.active {
-  border-color: #ff7d1a;
-}
-
-.thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Product Info */
-.product-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 1rem;
-}
-
-.product-info h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #1d2025;
-}
-
-.description {
-  color: #68707d;
-  line-height: 1.6;
-}
-
-.price-section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.price-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.current-price {
-  font-size: 1.875rem;
-  font-weight: bold;
-  color: #1d2025;
-}
-
-.discount-badge {
-  background-color: #ffeee2;
-  color: #ff7d1a;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  font-weight: bold;
-}
-
-.original-price {
-  color: #b6bcc8;
-  text-decoration: line-through;
-}
-
-/* Controls */
-.controls {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.quantity-controls {
-  display: flex;
-  align-items: center;
-  background-color: #f7f8fd;
-  border-radius: 0.5rem;
-}
-
-.quantity-btn {
-  padding: 0.75rem 1.25rem;
-  border: none;
-  background: none;
-  color: #ff7d1a;
-  font-weight: bold;
-  font-size: 1.25rem;
-  cursor: pointer;
-}
-
-.quantity-btn:hover {
-  color: #ffab6a;
-}
-
-.quantity {
-  padding: 0.75rem;
-  min-width: 3rem;
-  text-align: center;
-  font-weight: bold;
-}
-
-.add-to-cart {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  background-color: #ff7d1a;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.add-to-cart:hover {
-  background-color: #ffab6a;
-}
-
-.cart-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-/* Loading State */
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.spinner {
-  width: 4rem;
-  height: 4rem;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #ff7d1a;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Error Page */
-.error {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background-color: #f7f8fd;
-}
-
-.error-content {
-  text-align: center;
-}
-
-.error-content h1 {
-  font-size: 4rem;
-  font-weight: bold;
-  color: #1d2025;
-  margin-bottom: 1rem;
-}
-
-.error-content p {
-  color: #68707d;
-  margin-bottom: 2rem;
-}
-
-.btn {
-  display: inline-block;
-  background-color: #ff7d1a;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  font-weight: bold;
-  transition: background-color 0.2s;
-}
-
-.btn:hover {
-  background-color: #ffab6a;
-}
-
-.loading-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #68707d;
-}
+<style lang="scss">
+// The styles are now in app.scss
 </style>

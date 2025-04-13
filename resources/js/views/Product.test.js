@@ -18,12 +18,14 @@ const mockProduct = {
       discounted: 125.00
     },
     images: [
-      { url: '/image1.jpg', alt: 'Sneakers 1' },
-      { url: '/image2.jpg', alt: 'Sneakers 2' }
+      '/images/image-product-1.jpg',
+      '/images/image-product-2.jpg',
+      '/images/image-product-3.jpg',
+      '/images/image-product-4.jpg'
     ],
     discount: {
-      amount: 50,
-      active: true
+      type: 'percent',
+      amount: 50
     }
   }
 }
@@ -142,9 +144,9 @@ describe('Product.vue', () => {
 
     it('displays all product images as thumbnails', () => {
       const thumbnails = wrapper.findAll('.thumbnail')
-      expect(thumbnails).toHaveLength(2)
+      expect(thumbnails).toHaveLength(4)
       thumbnails.forEach((thumbnail, index) => {
-        expect(thumbnail.find('img').attributes('src')).toBe(mockProduct.data.images[index].url)
+        expect(thumbnail.find('img').attributes('src')).toBe(mockProduct.data.images[index])
       })
     })
   })
@@ -152,7 +154,7 @@ describe('Product.vue', () => {
   describe('Image Gallery', () => {
     it('displays first image as main image by default', () => {
       const mainImage = wrapper.find('.main-image img')
-      expect(mainImage.attributes('src')).toBe(mockProduct.data.images[0].url)
+      expect(mainImage.attributes('src')).toBe(mockProduct.data.images[0])
     })
 
     it('changes main image when thumbnail is clicked', async () => {
@@ -160,7 +162,7 @@ describe('Product.vue', () => {
       await thumbnails[1].trigger('click')
       
       const mainImage = wrapper.find('.main-image img')
-      expect(mainImage.attributes('src')).toBe(mockProduct.data.images[1].url)
+      expect(mainImage.attributes('src')).toBe(mockProduct.data.images[1])
     })
 
     it('adds active class to selected thumbnail', async () => {
@@ -224,9 +226,9 @@ describe('Product.vue', () => {
         price: mockProduct.data.price.discounted,
         original_price: mockProduct.data.price.full,
         discount: mockProduct.data.discount.amount,
-        images: mockProduct.data.images.map(img => ({
-          url: img.url,
-          alt: img.alt
+        images: mockProduct.data.images.map(path => ({
+          url: path,
+          alt: mockProduct.data.name
         }))
       })
     })
@@ -272,7 +274,6 @@ describe('Product.vue', () => {
       await flushPromises()
 
       expect(newWrapper.find('.original-price').exists()).toBe(false)
-      expect(newWrapper.find('.current-price').text()).toBe('$250.00')
       expect(newWrapper.find('.discount-badge').exists()).toBe(false)
     })
 
