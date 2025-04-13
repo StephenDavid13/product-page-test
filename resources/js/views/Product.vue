@@ -32,7 +32,7 @@
             @click="currentImageIndex = index"
             :class="['thumbnail', { active: currentImageIndex === index }]"
           >
-            <img :src="image" :alt="product.name">
+            <img :src="image.url" :alt="product.name">
           </button>
         </div>
       </div>
@@ -45,11 +45,11 @@
         <div class="price-section">
           <div class="price-row">
             <span class="current-price">${{ formatPrice(product.price) }}</span>
-            <span v-if="product.discount" class="discount-badge">
+            <span v-if="product.discount > 0" class="discount-badge">
               {{ product.discount }}%
             </span>
           </div>
-          <div v-if="product.original_price" class="original-price">
+          <div v-if="product.original_price !== null" class="original-price">
             ${{ formatPrice(product.original_price) }}
           </div>
         </div>
@@ -73,6 +73,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   data() {
     return {
@@ -89,7 +91,12 @@ export default {
       if (!this.product?.images?.length) {
         return null
       }
-      return this.product.images[this.currentImageIndex]
+      return this.product.images[this.currentImageIndex].url
+    },
+
+    discountedPrice() {
+      if (!this.product) return null
+      return this.product.price
     }
   },
 
@@ -99,17 +106,23 @@ export default {
         this.loading = true
         this.error = false
         this.product = null
+
         const response = await axios.get(`/client/products/${this.$route.params.slug}`)
         
-        // API response to match data structure
+        // Transform API response to match component data structure
         const productData = response.data.data
+        const hasDiscount = productData.discount?.active && productData.discount?.amount > 0
+        
         this.product = {
           name: productData.name,
           description: productData.description,
-          price: productData.price.discounted,
-          original_price: productData.price.full,
-          discount: productData.discount.amount,
-          images: productData.images
+          price: hasDiscount ? productData.price.discounted : productData.price.full,
+          original_price: hasDiscount ? productData.price.full : null,
+          discount: hasDiscount ? productData.discount.amount : 0,
+          images: productData.images.map(img => ({
+            url: img.url,
+            alt: img.alt
+          }))
         }
       } catch (error) {
         console.error('Error details:', {
@@ -119,9 +132,8 @@ export default {
           message: error.message
         })
         
-        if (error.response?.status === 404 || error.response?.status === 4040) {
-          this.error = true
-        }
+        this.product = null
+        this.error = error.response?.status === 404
       } finally {
         this.loading = false
       }

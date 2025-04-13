@@ -7,17 +7,25 @@
         "watch-poll": "mix watch -- --watch-options-poll=1000",
         "hot": "mix watch --hot",
         "prod": "npm run production",
-        "production": "mix --production"
+        "production": "mix --production",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage"
     },
     "devDependencies": {
-        "axios": "^0.21",
+        "@babel/core": "^7.17.0",
+        "@babel/preset-env": "^7.16.11",
+        "@vue/test-utils": "^2.0.0",
+        "@vue/vue3-jest": "^27.0.0-alpha.4",
+        "axios": "^0.25",
+        "babel-jest": "^27.5.1",
+        "jest": "^27.5.1",
+        "jest-environment-jsdom": "^27.5.1",
         "laravel-mix": "^6.0.6",
         "lodash": "^4.17.19",
         "postcss": "^8.1.14",
-        "resolve-url-loader": "^5.0.0",
-        "sass": "^1.66.1",
-        "sass-loader": "^12.6.0",
-        "vue-loader": "^17.2.2"
+        "vue": "^3.2.31",
+        "vue-loader": "^16.2.0"
     },
     "dependencies": {
         "vue": "^3.2.36",
